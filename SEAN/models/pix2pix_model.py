@@ -30,19 +30,21 @@ class Pix2PixModel(torch.nn.Module):
 
         return netG, netD, netE
         
-    def forward(self,src_data,oth_data,mode):
+    def forward(self,src_data,ref_data,mode):
         src_semantics, src_image = self.preprocess_input(src_data)
-        oth_semantics, oth_image = self.preprocess_input(oth_data)
-        #obj_dic = data['path']
 
-        if mode == 'dyeing':
+        if mode in ['black','brown','blond','red','blue']:
             with torch.no_grad():
-                fake_image = self.netG.dyeing(src_semantics,src_image,oth_semantics,oth_image,src_data['path'])
-            return fake_image
+                fake_image = self.netG.color_dyeing(src_semantics,src_image,mode,src_data['path'])
 
-        elif mode == 'styling':
+                return fake_image
+            
+        elif mode == 'custom':
+            ref_semantics, ref_image = self.preprocess_input(ref_data)
+            
             with torch.no_grad():
-                fake_image = self.netG.styling(src_semantics,src_image,oth_semantics,oth_data['path'])
+                fake_image = self.netG.custom_dyeing(src_semantics,src_image,ref_semantics,ref_image, src_data['path'])
+
             return fake_image
         
         else:

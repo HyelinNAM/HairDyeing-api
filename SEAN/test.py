@@ -1,56 +1,69 @@
 import os
 from collections import OrderedDict
 from itertools import cycle
+from PIL import Image
 
 from SEAN import data
 from SEAN.options.test_options import TestOptions
 from SEAN.models.pix2pix_model import Pix2PixModel
 from SEAN.util.visualizer import Visualizer
 
-def reconstruct(mode):
-    '''
-    opt = TestOptions().parse()
-    opt.status = 'test'
-    opt.contain_dontcare_label = True
-    opt.no_instance = True
-    '''
+from SEAN.data.base_dataset import get_params, get_transform
+
+def preprocess(opt,image_path,label_path):
+
+    # label
+    label = Image.open(label_path)
+    params = get_params(opt.preprocess_mode,label.size)
+    transform_label = get_transform(opt, params, method=Image.NEAREST, normalize=False)
+    label_tensor = transform_label(label) * 255.0
+    label_tensor[label_tensor == 255] = opt.label_nc
+
+    # image (Real)
+    image = Image.open(image_path)
+    image = image.convert('RGB')
+
+    transform_image = get_transform(opt,params)
+    image_tensor = transform_image(image)
+
+    instance_tensor = 0
+
+    return {'label':label_tensor, 'instance':instance_tensor, 'image':image_tensor, 'path':image_path}
+
+
+def reconstruct(opt):
 
     model = Pix2PixModel(opt)
     model.eval()
 
     visualizer = Visualizer(opt)
 
-    src_dataloader = data.create_dataloader(opt)
+    if opt.mode.lower() in ['black','brown','blond','red','blue']:
 
-    # make dataloader for ref/generated image
-    if mode == 'reference':
-        opt.image_dir = './data/dyeing'
-        opt.label_dir = '.results/label/others'
-    
-    elif mode == 'choice_color':
-        opt.image_dir = './data/'
+        src = preprocess(opt, image_path='', label_path='')
+
+        generated = model(src, None,  mode=opt.mode) # image, segmap 붙여야?
+
+        img_path = src['path']
+
+        print('process image...')
+        visuals = OrderedDict([('input_label', src['label']),
+                            ('synthesized_image', generated)])
+
+        visualizer.save_images(visuals, img_path,opt.results_dir,'results') #        
 
 
+    elif opt.lower() == 'custom':
+        
+        src = preprocess(opt, image_path='', label_path='')
+        ref = preprocess(opt, image_path='', label_path='')
+
+        generated = model(src,ref, mode=opt.styling_mode)
 
     else:
         raise NotImplementedError
 
 
-
-
-    if mode == 'dyeing':
-        opt.styling_mode = mode # dyeing
-
-        opt.image_dir = './data/dyeing'
-        opt.label_dir = './results/label/others'
-
-    else: # styling_ref / styling_rand
-        opt.styling_mode = 'styling'
-
-        opt.image_dir = './results/img'
-        opt.label_dir = './results/label/others'
-
-    oth_dataloader = data.create_dataloader(opt)
 
     for i, data_i in enumerate(zip(cycle(src_dataloader),oth_dataloader)):
         src_data = data_i[0]

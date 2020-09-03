@@ -93,5 +93,4 @@ def parsing(respth='./data/label', dspth='./data', cp='79999_iter.pth'):
             parsing[parsing == 117] = 13
             parsing[parsing == 118] = 14
                
-            vis_parsing_maps(image, parsing, stride=1, save_im=True, save_path=osp.join(respth, image_path[:-4]))
-            #vis_parsing_maps(image, parsing, stride=1, save_im=True, save_path=osp.join(respth,root[-3:],files[0][:-4]))
+            vis_parsing_maps(image, parsing, stride=1, save_im=True, save_path=osp.join(respth, respth[-3:])) # src & ref

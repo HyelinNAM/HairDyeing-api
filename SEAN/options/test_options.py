@@ -17,10 +17,11 @@ class TestOptions(BaseOptions):
         parser.set_defaults(phase='test')
 
         parser.add_argument('--status', type=str, default='test')
-        parser.add_argument('--styling_mode', type=str, default='dyeing',
-                        choices=['dyeing', 'styling'])
-        # for working parser.add_argument('--mode', type=str, default='NONE')
-        # for working parser.add_argument('--target_domain', type=str, default='NONE')
+
+        parser.add_argument('--mode', type=str, required=True,
+                        choices=['black','brown','blond','red','blue','custom'],type=str.lower, help='set mode(color)')
+        parser.add_argument('--seed', type=int, default=777,
+                        help='Seed for random number generator')
 
         self.isTrain = False
         return parser

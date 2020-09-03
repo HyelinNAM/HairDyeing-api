@@ -70,7 +70,51 @@ class SPADEGenerator(BaseNetwork):
 
         return sw, sh
 
-    def dyeing(self,orgin_seg,orgin_img,norgin_seg,norgin_img,obj_dic):
+    '''
+    def save_color_codes(self,orgin_seg, orgin_img):
+        style_codes = self.Zencoder(input=orgin_img, segmap=orgin_seg)
+    '''
+
+    def color_dyeing(self,orgin_seg,orgin_img,color,obj_dic):
+        
+        style_codes = self.Zencoder(input=orgin_img, segmap=orgin_seg)
+        color_codes = 불러오기[mode] # 어딘가에 dict로..!
+
+        style_codes[0][13] = color_codes[13]
+
+        x = F.interpolate(orgin_seg,size =(self.sh, self.sw))
+        x = self.fc(x)
+
+        x = self.head_0(x, orgin_seg, style_codes, obj_dic=obj_dic)
+
+        x = self.up(x)
+        x = self.G_middle_0(x, orgin_seg, style_codes, obj_dic=obj_dic)
+         
+        if self.opt.num_upsampling_layers == 'more' or \
+           self.opt.num_upsampling_layers == 'most':
+            x = self.up(x)
+
+        x = self.G_middle_1(x, orgin_seg, style_codes,  obj_dic=obj_dic)
+
+        x = self.up(x)
+        x = self.up_0(x, orgin_seg, style_codes, obj_dic=obj_dic)
+        x = self.up(x)
+        x = self.up_1(x, orgin_seg, style_codes, obj_dic=obj_dic)
+        x = self.up(x)
+        x = self.up_2(x, orgin_seg, style_codes, obj_dic=obj_dic)
+        x = self.up(x)
+        x = self.up_3(x, orgin_seg, style_codes,  obj_dic=obj_dic)
+
+        # if self.opt.num_upsampling_layers == 'most':
+        #     x = self.up(x)
+        #     x= self.up_4(x, seg, style_codes,  obj_dic=obj_dic)
+
+        x = self.conv_img(F.leaky_relu(x, 2e-1))
+        x = F.tanh(x)
+
+        return x
+        
+    def custom_dyeing(self,orgin_seg,orgin_img,norgin_seg,norgin_img,obj_dic):
         
         style_codes = self.Zencoder(input=orgin_img, segmap=orgin_seg)
         dyeing_style_codes = self.Zencoder(input=norgin_img, segmap=norgin_seg)
@@ -108,40 +152,6 @@ class SPADEGenerator(BaseNetwork):
         x = F.tanh(x)
         return x
 
-    def styling(self,orgin_seg,orgin_img,norgin_seg,obj_dic):
-        
-        style_codes = self.Zencoder(input=orgin_img, segmap=orgin_seg)
-
-        x = F.interpolate(norgin_seg,size =(self.sh, self.sw))
-        x = self.fc(x)
-
-        x = self.head_0(x, norgin_seg, style_codes, obj_dic=obj_dic)
-
-        x = self.up(x)
-        x = self.G_middle_0(x, norgin_seg, style_codes, obj_dic=obj_dic)
-         
-        if self.opt.num_upsampling_layers == 'more' or \
-           self.opt.num_upsampling_layers == 'most':
-            x = self.up(x)
-
-        x = self.G_middle_1(x, norgin_seg, style_codes,  obj_dic=obj_dic)
-
-        x = self.up(x)
-        x = self.up_0(x, norgin_seg, style_codes, obj_dic=obj_dic)
-        x = self.up(x)
-        x = self.up_1(x, norgin_seg, style_codes, obj_dic=obj_dic)
-        x = self.up(x)
-        x = self.up_2(x, norgin_seg, style_codes, obj_dic=obj_dic)
-        x = self.up(x)
-        x = self.up_3(x, norgin_seg, style_codes,  obj_dic=obj_dic)
-
-        # if self.opt.num_upsampling_layers == 'most':
-        #     x = self.up(x)
-        #     x= self.up_4(x, seg, style_codes,  obj_dic=obj_dic)
-
-        x = self.conv_img(F.leaky_relu(x, 2e-1))
-        x = F.tanh(x)
-        return x
 
 # class Pix2PixHDGenerator(BaseNetwork):
 #     @staticmethod
