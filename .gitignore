@@ -8,9 +8,6 @@ __pycache__/
 # pretrained_network
 pretrained_network/*
 
-# data
-data/
-
 # results folder
 styles_test/
 results/
