@@ -26,7 +26,7 @@ main.py를 통해 염색 이미지를 생성할 수 있는 방법은 2가지 입
    ex. python main.py --mode black
 ```
 
-+pkl 파일에 색상 코드 변경 또는 새로운 색상 추가하기
++pkl 파일 색상 코드 변경 또는 새로운 색상 추가하기
 ```python
 1) data/ref 폴더 생성
 
