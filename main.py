@@ -23,6 +23,12 @@ def main(args):
     
         reconstruct(args)
 
+    elif args.mode.lower() == 'save_color':
+
+        parsing(respth='./results/label', dspth='./data/ref')
+
+        reconstruct(args)
+
     else:
         raise NotImplementedError
 

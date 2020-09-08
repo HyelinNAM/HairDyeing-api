@@ -1,7 +1,9 @@
 import os
+import os.path as osp
 from collections import OrderedDict
 from itertools import cycle
 from PIL import Image
+import torch
 
 from SEAN import data
 from SEAN.options.test_options import TestOptions
@@ -10,26 +12,26 @@ from SEAN.util.visualizer import Visualizer
 
 from SEAN.data.base_dataset import get_params, get_transform
 
-def preprocess(opt,image_path,label_path):
-
+def preprocess(opt,image_path,label_path): ## __getitem__
     # label
     label = Image.open(label_path)
-    params = get_params(opt.preprocess_mode,label.size)
+    params = get_params(opt,label.size)
     transform_label = get_transform(opt, params, method=Image.NEAREST, normalize=False)
     label_tensor = transform_label(label) * 255.0
     label_tensor[label_tensor == 255] = opt.label_nc
 
     # image (Real)
-    image = Image.open(image_path)
+    for path in os.listdir(image_path):
+        image = Image.open(osp.join(image_path, path))
+    
     image = image.convert('RGB')
 
     transform_image = get_transform(opt,params)
     image_tensor = transform_image(image)
 
-    instance_tensor = 0
+    instance_tensor = torch.Tensor([0])
 
     return {'label':label_tensor, 'instance':instance_tensor, 'image':image_tensor, 'path':image_path}
-
 
 def reconstruct(opt):
 
@@ -40,45 +42,42 @@ def reconstruct(opt):
 
     if opt.mode.lower() in ['black','brown','blond','red','blue']:
 
-        src = preprocess(opt, image_path='', label_path='')
+        src = preprocess(opt, image_path='data/src', label_path='results/label/src.png')
 
-        generated = model(src, None,  mode=opt.mode) # image, segmap 붙여야?
+        generated = model(src,None,opt) # image, segmap 붙여야
 
         img_path = src['path']
 
         print('process image...')
         visuals = OrderedDict([('input_label', src['label']),
-                            ('synthesized_image', generated)])
+                            ('synthesized_image', generated.squeeze(0))])
 
-        visualizer.save_images(visuals, img_path,opt.results_dir,'results') #        
+        visualizer.save_images(visuals, img_path,opt.results_dir,'results')   
 
-
-    elif opt.lower() == 'custom':
+    elif opt.mode.lower() == 'custom':
         
-        src = preprocess(opt, image_path='', label_path='')
-        ref = preprocess(opt, image_path='', label_path='')
+        src = preprocess(opt, image_path='data/src', label_path='results/label/src.png')
+        ref = preprocess(opt, image_path='data/ref', label_path='results/label/ref.png')
 
-        generated = model(src,ref, mode=opt.styling_mode)
+        generated = model(src,ref,opt)
 
-    else:
-        raise NotImplementedError
+        img_path = src['path']
+
+        print('process image...')
+        visuals = OrderedDict([('input_label', src['label']),
+                            ('synthesized_image', generated.squeeze(0))])
+
+        visualizer.save_images(visuals, img_path,opt.results_dir,'results')
+
+    elif opt.mode.lower() == 'save_color':
+
+        ref = preprocess(opt, image_path='data/ref', label_path='results/label/ref.png')
+
+        generated = model(None,ref,opt)
 
 
 
-    for i, data_i in enumerate(zip(cycle(src_dataloader),oth_dataloader)):
-        src_data = data_i[0]
-        oth_data = data_i[1]
-        generated = model(src_data,oth_data, mode=opt.styling_mode)
 
-        img_path = src_data['path']
-
-        for b in range(generated.shape[0]):
-            print('process image... %s' % img_path[b])
-            visuals = OrderedDict([('input_label', src_data['label'][b]),
-                               ('synthesized_image', generated[b])])
-
-            visualizer.save_images(visuals, img_path[b:b + 1],opt.results_dir,f'results_{i}')
-    
         
 
 

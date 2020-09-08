@@ -185,7 +185,6 @@ class Zencoder(torch.nn.Module):
         # print(segmap.shape)
         # print(codes.shape)
 
-
         b_size = codes.shape[0]
         # h_size = codes.shape[2]
         # w_size = codes.shape[3]

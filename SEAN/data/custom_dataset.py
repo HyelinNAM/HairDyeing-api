@@ -45,6 +45,6 @@ class CustomDataset(Pix2pixDataset):
         else:
             instance_paths = []
 
-        assert len(label_paths) == len(image_paths) "The #images in %s and %s do not match. Is there something wrong?"
+        assert len(label_paths) == len(image_paths), "The #images in %s and %s do not match. Is there something wrong?"
 
         return label_paths, image_paths, instance_paths

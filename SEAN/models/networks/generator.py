@@ -2,7 +2,7 @@
 Copyright (C) 2019 NVIDIA Corporation.  All rights reserved.
 Licensed under the CC BY-NC-SA 4.0 license (https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode).
 """
-
+import pickle
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -70,17 +70,26 @@ class SPADEGenerator(BaseNetwork):
 
         return sw, sh
 
-    '''
-    def save_color_codes(self,orgin_seg, orgin_img):
-        style_codes = self.Zencoder(input=orgin_img, segmap=orgin_seg)
-    '''
+    def save_color_codes(self,norgin_seg,norgin_img):
 
-    def color_dyeing(self,orgin_seg,orgin_img,color,obj_dic):
-        
-        style_codes = self.Zencoder(input=orgin_img, segmap=orgin_seg)
-        color_codes = 불러오기[mode] # 어딘가에 dict로..!
+        norgin_img = torch.unsqueeze(norgin_img,0)
 
-        style_codes[0][13] = color_codes[13]
+        color_codes = self.Zencoder(input=norgin_img, segmap=norgin_seg)
+
+        return color_codes[0][13]
+
+    def color_dyeing(self,orgin_seg,orgin_img,selected_color,obj_dic):
+
+        orgin_img = torch.unsqueeze(orgin_img,0)
+
+        style_codes = self.Zencoder(input=orgin_img, segmap=orgin_seg)
+
+        with open ('color_code.pkl', 'rb') as handle:
+            color = pickle.load(handle)
+
+        color_code = color[selected_color]
+
+        style_codes[0][13] = color_code
 
         x = F.interpolate(orgin_seg,size =(self.sh, self.sw))
         x = self.fc(x)
@@ -115,10 +124,13 @@ class SPADEGenerator(BaseNetwork):
         return x
         
     def custom_dyeing(self,orgin_seg,orgin_img,norgin_seg,norgin_img,obj_dic):
-        
+
+        orgin_img = torch.unsqueeze(orgin_img,0)
+        norgin_img = torch.unsqueeze(norgin_img,0)
+
         style_codes = self.Zencoder(input=orgin_img, segmap=orgin_seg)
         dyeing_style_codes = self.Zencoder(input=norgin_img, segmap=norgin_seg)
-
+        
         style_codes[0][13] = dyeing_style_codes[0][13]
 
         x = F.interpolate(orgin_seg,size =(self.sh, self.sw))

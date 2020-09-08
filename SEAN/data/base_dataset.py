@@ -26,6 +26,7 @@ def get_params(opt, size):
     w, h = size
     new_h = h
     new_w = w
+    
     if opt.preprocess_mode == 'resize_and_crop':
         new_h = new_w = opt.load_size
     elif opt.preprocess_mode == 'scale_width_and_crop':

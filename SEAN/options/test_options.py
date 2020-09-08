@@ -18,10 +18,13 @@ class TestOptions(BaseOptions):
 
         parser.add_argument('--status', type=str, default='test')
 
-        parser.add_argument('--mode', type=str, required=True,
-                        choices=['black','brown','blond','red','blue','custom'],type=str.lower, help='set mode(color)')
+        parser.add_argument('--mode', type=str.lower, required=True,
+                        choices=['black','brown','blond','red','blue','custom','save_color'],help='set mode(color)')
+        
         parser.add_argument('--seed', type=int, default=777,
                         help='Seed for random number generator')
+
+        parser.add_argument('--color_name', type=str.lower)
 
         self.isTrain = False
         return parser
