@@ -1,6 +1,8 @@
 # HairDyeing-api
 
-main.py를 통해 염색 이미지를 생성할 수 있는 방법은 2가지 입니다. 
+main.py를 통해 염색 이미지를 생성할 수 있는 방법은 2가지 입니다.
+
+아래 방법을 통해 이미지를 생성하기 위해서는 [Face parsing](https://drive.google.com/file/d/154JgKpzCPW82qINcVieuPH3fZ2e0P812/view), [SEAN](https://drive.google.com/file/d/1TKhN9kDvJEcpbIarwsd1_fsTR2vGx6LC/view)의 pretrained 모델을 다운 받아, pretrained_network 폴더에 담아주세요.
 
 ## 1. Reference 이미지 이용 </br>
 : 머리 색을 가져오고싶은 reference 이미지가 있는 경우
@@ -36,3 +38,6 @@ main.py를 통해 염색 이미지를 생성할 수 있는 방법은 2가지 입
    ex. python main.py --mode save_color --color_name pink
 ```
 
+## Reference
+- [SEAN](https://github.com/ZPdesu/SEAN)
+- [face-parsing.PyTorch](https://github.com/zllrunning/face-parsing.PyTorch)
