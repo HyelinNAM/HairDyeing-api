@@ -6,10 +6,10 @@ __pycache__/
 *.pyc
 
 # pretrained_network
-pretrained_network/*
+# pretrained_network/*
 
 # data
-data/
+# data/
 
 # results folder
 styles_test/
